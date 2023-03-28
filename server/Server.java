@@ -1,7 +1,11 @@
 package server;
 
 import javafx.util.Pair;
+import server.models.Course;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -10,9 +14,15 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/**
+ */
 public class Server {
 
+    /**
+    */
     public final static String REGISTER_COMMAND = "INSCRIRE";
+    /**
+    */
     public final static String LOAD_COMMAND = "CHARGER";
     private final ServerSocket server;
     private Socket client;
@@ -20,12 +30,16 @@ public class Server {
     private ObjectOutputStream objectOutputStream;
     private final ArrayList<EventHandler> handlers;
 
+    /**
+    */
     public Server(int port) throws IOException {
         this.server = new ServerSocket(port, 1);
         this.handlers = new ArrayList<EventHandler>();
         this.addEventHandler(this::handleEvents);
     }
 
+    /**
+    */
     public void addEventHandler(EventHandler h) {
         this.handlers.add(h);
     }
@@ -36,6 +50,8 @@ public class Server {
         }
     }
 
+    /**
+    */
     public void run() {
         while (true) {
             try {
@@ -52,6 +68,8 @@ public class Server {
         }
     }
 
+    /**
+    */
     public void listen() throws IOException, ClassNotFoundException {
         String line;
         if ((line = this.objectInputStream.readObject().toString()) != null) {
@@ -62,6 +80,8 @@ public class Server {
         }
     }
 
+    /**
+    */
     public Pair<String, String> processCommandLine(String line) {
         String[] parts = line.split(" ");
         String cmd = parts[0];
@@ -69,12 +89,16 @@ public class Server {
         return new Pair<>(cmd, args);
     }
 
+    /**
+    */
     public void disconnect() throws IOException {
         objectOutputStream.close();
         objectInputStream.close();
         client.close();
     }
 
+    /**
+    */
     public void handleEvents(String cmd, String arg) {
         if (cmd.equals(REGISTER_COMMAND)) {
             handleRegistration();
@@ -91,8 +115,31 @@ public class Server {
      @param arg la session pour laquelle on veut récupérer la liste des cours
      */
     public void handleLoadCourses(String arg) {
-        // TODO: implémenter cette méthode
-    }
+        try {
+            FileReader fr = new FileReader(??);
+            BufferedReader reader = new BufferedReader(fr);
+            ArrayList<String> courses = new ArrayList<>();
+
+            String ligne;
+            while (ligne = reader.readline() =! null) {
+                Course course = Course.fromString(ligne);
+                if (course.getSession().equals(arg)) {
+                    courses.add(course);
+                }
+                ligne = reader.readLine();
+            }
+            reader.close();
+
+            ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
+            oos.writeObject(Courses);
+            oos.close();
+            }
+
+        } catch (IOException ex) {
+            System.err.println("Erreur à l'ouverture du fichier");
+        } catch (FileNotFoundException e) {
+            System.err.println("Une erreur s'est prduite lors de la lecture ou de l'écriture : " + e.getMessage());
+        }
 
     /**
      Récupérer l'objet 'RegistrationForm' envoyé par le client en utilisant 'objectInputStream', l'enregistrer dans un fichier texte
