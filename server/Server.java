@@ -122,7 +122,7 @@ public class Server {
 
             String ligne;
             while (ligne = reader.readline() =! null) {
-                Course course = Course.fromString(ligne);
+                Course course = Course.fromString(ligne)???;
                 if (course.getSession().equals(arg)) {
                     courses.add(course);
                 }
@@ -131,7 +131,7 @@ public class Server {
             reader.close();
 
             ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
-            oos.writeObject(Courses);
+            oos.writeObject(courses);
             oos.close();
             }
 
