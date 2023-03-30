@@ -4,6 +4,7 @@ import javafx.util.Pair;
 import server.models.Course;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -73,6 +74,9 @@ public class Server {
     public void listen() throws IOException, ClassNotFoundException {
         String line;
         if ((line = this.objectInputStream.readObject().toString()) != null) {
+            // à supprimer
+            System.out.println(line);
+
             Pair<String, String> parts = processCommandLine(line);
             String cmd = parts.getKey();
             String arg = parts.getValue();
@@ -116,30 +120,27 @@ public class Server {
      */
     public void handleLoadCourses(String arg) {
         try {
-            FileReader fr = new FileReader(??);
-            BufferedReader reader = new BufferedReader(fr);
-            ArrayList<String> courses = new ArrayList<>();
+            FileReader fileReader = new FileReader("server/data/cours.txt");
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            ArrayList<Course> filteredCourses = new ArrayList<Course>();
 
-            String ligne;
-            while (ligne = reader.readline() =! null) {
-                Course course = Course.fromString(ligne)???;
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                String[] lineElements = line.split("\t");
+                Course course = new Course(lineElements[1], lineElements[0], lineElements[2]);
                 if (course.getSession().equals(arg)) {
-                    courses.add(course);
+                    filteredCourses.add(course);
                 }
-                ligne = reader.readLine();
             }
-            reader.close();
+            bufferedReader.close();
+            objectOutputStream.writeObject(filteredCourses);
 
-            ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
-            oos.writeObject(courses);
-            oos.close();
-            }
-
-        } catch (IOException ex) {
-            System.err.println("Erreur à l'ouverture du fichier");
         } catch (FileNotFoundException e) {
+            System.err.println("Erreur à l'ouverture du fichier");
+        } catch (IOException e) {
             System.err.println("Une erreur s'est prduite lors de la lecture ou de l'écriture : " + e.getMessage());
         }
+    }
 
     /**
      Récupérer l'objet 'RegistrationForm' envoyé par le client en utilisant 'objectInputStream', l'enregistrer dans un fichier texte

@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "ServerLauncher",
+            "request": "launch",
+            "mainClass": "server.ServerLauncher",
+            "projectName": "prog2_tp2_3e647835"
+        },
+        {
+            "type": "java",
             "name": "Vue",
             "request": "launch",
             "mainClass": "src.Vue",
