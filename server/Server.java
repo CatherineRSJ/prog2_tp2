@@ -2,11 +2,11 @@ package server;
 
 import javafx.util.Pair;
 import server.models.Course;
-
+import server.models.RegistrationForm;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -14,6 +14,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  */
@@ -74,9 +75,6 @@ public class Server {
     public void listen() throws IOException, ClassNotFoundException {
         String line;
         if ((line = this.objectInputStream.readObject().toString()) != null) {
-            // à supprimer
-            System.out.println(line);
-
             Pair<String, String> parts = processCommandLine(line);
             String cmd = parts.getKey();
             String arg = parts.getValue();
@@ -138,7 +136,7 @@ public class Server {
         } catch (FileNotFoundException e) {
             System.err.println("Erreur à l'ouverture du fichier");
         } catch (IOException e) {
-            System.err.println("Une erreur s'est prduite lors de la lecture ou de l'écriture : " + e.getMessage());
+            System.err.println("Une erreur s'est produite lors de la lecture ou de l'écriture : " + e.getMessage());
         }
     }
 
@@ -148,7 +146,22 @@ public class Server {
      La méthode gére les exceptions si une erreur se produit lors de la lecture de l'objet, l'écriture dans un fichier ou dans le flux de sortie.
      */
     public void handleRegistration() {
-        // TODO: implémenter cette méthode
+        try {
+            RegistrationForm form = (RegistrationForm) objectInputStream.readObject();
+ 
+            FileWriter writer = new FileWriter("server/data/inscription.txt", true);
+            ArrayList<String> inscription = new ArrayList<String>();
+            Collections.addAll(inscription, form.getCourse().getSession(), form.getCourse().getCode(), form.getMatricule(), form.getPrenom(), form.getNom(), form.getEmail());
+            writer.write(String.join("\t", inscription) + "\n");
+            writer.close();
+
+            objectOutputStream.writeUTF("Félicitations! " + form.getPrenom() + " est inscrit.e au cours " + form.getCourse().getCode() +".");
+            // objectOutputStream.flush();
+        } catch (ClassNotFoundException e) {
+            System.err.println("Une erreur s'est produite lors de la lecture ou de l'écriture : " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Erreur à l'écriture du fichier : " + e.getMessage());
+        }
     }
 }
 

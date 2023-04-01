@@ -1,21 +1,24 @@
 package src;
 
 import java.io.IOException;
-
+import java.util.ArrayList;
 import javafx.application.Application;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -30,6 +33,8 @@ public class Vue extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         controller = new Controlleur(1337);
+
+        Alert alerte = new Alert(AlertType.ERROR);
 
         primaryStage.setResizable(false);
         HBox root = new HBox(30);
@@ -47,9 +52,13 @@ public class Vue extends Application {
         TableView<Course> table = new TableView<Course>();
         table.setEditable(true);
         TableColumn<Course, String> code = new TableColumn<>("Code");
-        code.setCellValueFactory(new PropertyValueFactory<>("code"));
+        code.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getCode()));
+        code.prefWidthProperty().bind(table.widthProperty().multiply(0.30));
+        code.setResizable(false);
         TableColumn<Course, String> cours = new TableColumn<>("Cours");
-        code.setCellValueFactory(new PropertyValueFactory<>("name"));
+        cours.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getName()));
+        cours.prefWidthProperty().bind(table.widthProperty().multiply(0.70));
+        cours.setResizable(false);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.getColumns().addAll(code, cours);
         this.table = table;
@@ -60,7 +69,7 @@ public class Vue extends Application {
         HBox select = new HBox(40);
         fenetre1.getChildren().add(select);
         ComboBox<String> comboBox = new ComboBox<>();
-        comboBox.getItems().addAll("Automne", "Hiver", "Été");
+        comboBox.getItems().addAll("Automne", "Hiver", "Ete");
         comboBox.getSelectionModel().selectFirst();
         select.getChildren().add(comboBox);
 
@@ -69,7 +78,8 @@ public class Vue extends Application {
             @Override 
             public void handle(ActionEvent e) {
                 try{
-                    ObservableList<Course> courses = controller.loadCourses("Hiver");
+                    String sessionSelect = comboBox.getValue();
+                    ObservableList<Course> courses = FXCollections.observableArrayList(controller.loadCourses(sessionSelect));
                     table.setItems(courses);
                 }catch(IOException ex){
 
@@ -109,6 +119,30 @@ public class Vue extends Application {
         champ.setAlignment(Pos.CENTER_LEFT);
         
         Button envoyer = new Button("envoyer");
+        envoyer.setOnAction(new EventHandler<ActionEvent>() {
+            @Override 
+            public void handle(ActionEvent e) {
+                try{
+                    ArrayList<String> reponse = controller.register(
+                        table.getSelectionModel().getSelectedItem(), 
+                        prenom.getText(), 
+                        nom.getText(), 
+                        email.getText(), 
+                        matricule.getText()
+                    );
+                    if(reponse.get(0) == "succes"){
+                        alerte.setAlertType(AlertType.INFORMATION);
+                        alerte.setContentText(reponse.get(1));
+                    }else{
+                        alerte.setAlertType(AlertType.ERROR);
+                        alerte.setContentText(String.join("\n", reponse));
+                    }
+                    alerte.show();
+                }catch(IOException ex){
+
+                }
+            }
+        });
         fenetre2.getChildren().add(envoyer);
 
         root.setAlignment(Pos.CENTER);
