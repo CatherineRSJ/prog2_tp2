@@ -9,6 +9,13 @@
             "name": "ClientSimple",
             "request": "launch",
             "mainClass": "client_simple.ClientSimple",
+            "projectName": "prog2_tp2_3e647835"
+        },
+        {
+            "type": "java",
+            "name": "ClientSimple",
+            "request": "launch",
+            "mainClass": "client_simple.ClientSimple",
             "projectName": "prog2_tp2_ba018d7d"
         },
         {
