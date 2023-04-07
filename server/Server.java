@@ -17,14 +17,17 @@ import java.util.Arrays;
 import java.util.Collections;
 
 /**
+ * Le serveur gère la liste des cours et l'inscription.
  */
 public class Server {
 
     /**
-    */
+     * [ATTRIBUT] - Il s'agit de la constante pour la commande d'inscription.
+     */
     public final static String REGISTER_COMMAND = "INSCRIRE";
     /**
-    */
+     * [ATTRIBUT] - Il s'agit de la constante pour la commande pour recevoir la liste des cours.
+     */
     public final static String LOAD_COMMAND = "CHARGER";
     private final ServerSocket server;
     private Socket client;
@@ -33,7 +36,10 @@ public class Server {
     private final ArrayList<EventHandler> handlers;
 
     /**
-    */
+     * [CONSTRUCTEUR] - Il créé un socket selon le port spécifié et initialise un {@link EventHandler} pour les commandes.
+     * @param port Port de communication client - serveur
+     * @throws IOException Si le constructeur n'arrive pas à créer le socket
+     */
     public Server(int port) throws IOException {
         this.server = new ServerSocket(port, 1);
         this.handlers = new ArrayList<EventHandler>();
@@ -41,7 +47,9 @@ public class Server {
     }
 
     /**
-    */
+     * [MÉTHODE] - Il s'agit d'une méthode qui permet d'ajouter un {@link EventHandler}.
+     * @param h EventHandler
+     */
     public void addEventHandler(EventHandler h) {
         this.handlers.add(h);
     }
@@ -53,7 +61,11 @@ public class Server {
     }
 
     /**
-    */
+     * [MÉTHODE] - Il s'agit d'une méthode qui exécute le serveur.
+     * Elle attend une connexion client, elle initialise les flux de communications et elle attend pour une commande.
+     * Le client est déconnecté après l'excécution de la commande.
+     * @throws Exception Si une erreur est lancée au moment de l'exécution
+     */
     public void run() {
         while (true) {
             try {
@@ -71,7 +83,11 @@ public class Server {
     }
 
     /**
-    */
+     * [MÉTHODE] - Il s'agit d'une méthode qui attend une commande d'un client
+     * Elle exécute la commande une fois qu'elle est reçu.
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public void listen() throws IOException, ClassNotFoundException {
         String line;
         if ((line = this.objectInputStream.readObject().toString()) != null) {
@@ -83,7 +99,10 @@ public class Server {
     }
 
     /**
-    */
+     * [MÉTHODE] - Il s'agit d'une méthode qui reçoit une commande client et qui la transforme en Pair.
+     * @param line String envoyée par le client qui contient une commande et des arguments
+     * @return Un objet de type Pair contenant la commande et les arguments
+     */
     public Pair<String, String> processCommandLine(String line) {
         String[] parts = line.split(" ");
         String cmd = parts[0];
@@ -92,7 +111,9 @@ public class Server {
     }
 
     /**
-    */
+     * [MÉTHODE] - Il s'agit d'une méthode qui ferme les flux de communication et qui déconnecte le client.
+     * @throws IOException Si une erreur est lancé à la fermeture des flux ou à la déconnexion du client
+     */
     public void disconnect() throws IOException {
         objectOutputStream.close();
         objectInputStream.close();
@@ -100,7 +121,10 @@ public class Server {
     }
 
     /**
-    */
+     * [MÉTHODE] - Il s'agit d'une méthode qui exécute une méthode selon la commande reçue en paramètre.
+     * @param cmd La commande envoyée par le client
+     * @param arg Les arguments pour la commande
+     */
     public void handleEvents(String cmd, String arg) {
         if (cmd.equals(REGISTER_COMMAND)) {
             handleRegistration();
@@ -110,11 +134,9 @@ public class Server {
     }
 
     /**
-     Lire un fichier texte contenant des informations sur les cours et les transofmer en liste d'objets 'Course'.
-     La méthode filtre les cours par la session spécifiée en argument.
-     Ensuite, elle renvoie la liste des cours pour une session au client en utilisant l'objet 'objectOutputStream'.
-     La méthode gère les exceptions si une erreur se produit lors de la lecture du fichier ou de l'écriture de l'objet dans le flux.
-     @param arg la session pour laquelle on veut récupérer la liste des cours
+     * [MÉTHODE] - Il s'agit d'une méthode qui envoie la liste des cours sous le format de la classe {@link Course} au client.
+     * Elle filtre les cours selon la session reçue en paramètre.
+     * @param arg La session pour filtrer les cours
      */
     public void handleLoadCourses(String arg) {
         try {
@@ -141,9 +163,8 @@ public class Server {
     }
 
     /**
-     Récupérer l'objet 'RegistrationForm' envoyé par le client en utilisant 'objectInputStream', l'enregistrer dans un fichier texte
-     et renvoyer un message de confirmation au client.
-     La méthode gére les exceptions si une erreur se produit lors de la lecture de l'objet, l'écriture dans un fichier ou dans le flux de sortie.
+     * [MÉTHODE] - Il s'agit d'une méthode qui inscrit un utilisateur à un cours selon une instance de {@link RegistrationForm} reçue via le flux de communication.
+     * Elle écrit dans le flux de communication un message en cas de succès.
      */
     public void handleRegistration() {
         try {
@@ -156,7 +177,6 @@ public class Server {
             writer.close();
 
             objectOutputStream.writeUTF("Félicitations! " + form.getPrenom() + " est inscrit.e au cours " + form.getCourse().getCode() +".");
-            // objectOutputStream.flush();
         } catch (ClassNotFoundException e) {
             System.err.println("Une erreur s'est produite lors de la lecture ou de l'écriture : " + e.getMessage());
         } catch (IOException e) {

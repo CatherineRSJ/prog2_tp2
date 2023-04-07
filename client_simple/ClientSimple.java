@@ -11,13 +11,19 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * La classe ClientSimple représente un client en ligne de commande.
+ */
 public class ClientSimple {
     private static Socket socket;
     private static ObjectInputStream objectInputStream;
     private static ObjectOutputStream objectOutputStream;
     private static ArrayList<Course> cours;
 
-    private static String choisirSession(){
+    /**
+     * [MÉTHODE] - Il s'agit d'une méthode qui affiche les sessions à la console et qui attend un choix de l'utilisateur
+     */
+    public static String choisirSession(){
         System.out.println("Veuillez choisir la session pour laquelle vous voulez consulter la liste des cours:");
         System.out.print("1. Automne\n2. Hiver\n3. Ete\n> Choix: ");
         String session = "";
@@ -41,7 +47,14 @@ public class ClientSimple {
         return session;
     }
 
-    private static String choisirCours(String session) throws IOException, ClassNotFoundException{
+    /**
+     * [MÉTHODE] - Il s'agit d'une méthode qui fait appel à la méthode {@link #loadCourses} avec la session reçue en paramètres.
+     * Elle affiche les cours chargés à la console et attend un choix de l'utilisateur.
+     * @param session La session pour charger les cours
+     * @throws IOException Si une erreur est lancée au moment de charger les cours
+     * @throws ClassNotFoundException Si une erreur est lancée au moment de charger les cours
+     */
+    public static String choisirCours(String session) throws IOException, ClassNotFoundException{
         System.out.println("Les cours offerts pendant la session d'" + session.toLowerCase() + " sont:");
         
         cours = loadCourses(session);
@@ -69,6 +82,11 @@ public class ClientSimple {
         return choix;
     }
 
+    /**
+     * [MÉTHODE] - Il s'agit de la méthode exécutable de ClientSimple.
+     * Elle fait appel aux méthodes {@link #choisirSession}, {@link #choisirCours} et {@link #remplirFormulaire} et donne la possibilité de recommencer.
+     * @param args Liste des paramètres de l'exécutable - Ne sont pas utilisés
+     */
     public static void main(String[] args) {
         try {
             System.out.println("***Bienvenue au portail d'inscription au cours de l'UdeM***");
@@ -105,21 +123,36 @@ public class ClientSimple {
     }
 
     /**
-    */
-    private static void connect() throws IOException {
+     * [MÉTHODE] - Il s'agit d'une méthode qui établie une connexion avec le serveur.
+     * Elle initialise aussi les flux de communications.
+     * @throws IOException
+     */
+    public static void connect() throws IOException {
         socket = new Socket("127.0.0.1", 1337);
         objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
         objectInputStream = new ObjectInputStream(socket.getInputStream());
     }
 
     /**
-    */
+     * [MÉTHODE] - Il s'agit d'une méthode qui ferme la connexion avec le serveur.
+     * Elle ferme aussi les flux de communications.
+     * @throws IOException
+     */
     public static void disconnect() throws IOException {
         objectOutputStream.close();
         objectInputStream.close();
         socket.close();
     }
 
+    /**
+     * [MÉTHODE] - Il s'agit d'une méthode qui fait appel à {@link #connect}.
+     * Elle envoie la commande pour charger au serveur via les flux de communication.
+     * Elle fait appel à {@link #disconnect}.
+     * @param session La session pour charger les cours
+     * @return La liste des cours pour la session reçue en paramètre
+     * @throws IOException Si une erreur est lancée au moment de charger les cours
+     * @throws ClassNotFoundException Si une erreur est lancée au moment de charger les cours
+     */
     public static ArrayList<Course> loadCourses(String session) throws IOException, ClassNotFoundException {
         connect();
 
@@ -131,7 +164,12 @@ public class ClientSimple {
         disconnect();
         return line;
     }
-
+    
+    /**
+     * [MÉTHODE] - Il s'agit d'une méthode qui demande à l'utilisateur les informations nécessaires à la création d'un {@link RegistrationForm}.
+     * Elle fait appel à la méthode {@link #connect}. Elle envoie le formulaire via le flux de communication et elle fait appel à la méthode {@link #disconnect}.
+     * @throws IOException
+     */
     public static void remplirFormulaire() throws IOException{
         String prenom = "";
         String nom = "";

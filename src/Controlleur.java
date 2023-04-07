@@ -7,44 +7,60 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import server.models.Course;
 import server.models.RegistrationForm;
 
+/**
+ * La classe Controlleur regroupe les méthodes utiles à l'interface graphique.
+ */
 public class Controlleur {
+    private int port;
     private Socket socket;
     private ObjectInputStream objectInputStream;
     private ObjectOutputStream objectOutputStream;
 
     /**
-    */
+     * [CONSTRUCTEUR] - Il s'agit d'un constructeur qui initialise le port à utiliser
+     *  selon lui reçu en paramètre.
+     * @param port Port à utiliser pour le socket
+     */
     public Controlleur(int port) {
-        // try{
-        //     socket = new Socket("127.0.0.1", port);
-        //     objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-        //     objectInputStream = new ObjectInputStream(socket.getInputStream());
-        // }catch(IOException error){
-        //     System.out.println(error.getMessage());
-        // }
+        this.port = port;
     }
 
-    private void connect() throws IOException {
-        socket = new Socket("127.0.0.1", 1337);
+    /**
+     * [MÉTHODE] - Il s'agit d'une méthode qui établie une connexion avec le serveur.
+     * Elle initialise également les flux de communication.
+     * @throws IOException
+     */
+    public void connect() throws IOException {
+        socket = new Socket("127.0.0.1", port);
         objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
         objectInputStream = new ObjectInputStream(socket.getInputStream());
     }
 
     /**
-    */
+     * [MÉTHODE] - Il s'agit d'une méthode qui ferme les flux de communication.
+     * Elle ferme également la connexion avec le serveur.
+     * @throws IOException
+     */
     public void disconnect() throws IOException {
         objectOutputStream.close();
         objectInputStream.close();
         socket.close();
     }
 
+    /**
+     * [MÉTHODE] - Il s'agit d'une méthode qui fait appel à {@link #connect}.
+     * Elle envoie la commande pour charger au serveur via les flux de communication.
+     * Elle fait appel à {@link #disconnect}.
+     * @param session La session pour charger les cours
+     * @return La liste des cours pour la session reçue en paramètre
+     * @throws IOException Si une erreur est lancée au moment de charger les cours
+     * @throws ClassNotFoundException Si une erreur est lancée au moment de charger les cours
+     */
     public ArrayList<Course> loadCourses(String session) throws IOException, ClassNotFoundException {
         this.connect();
-        
 
         objectOutputStream.writeObject("CHARGER " + session);
 
@@ -55,6 +71,12 @@ public class Controlleur {
         return line;
     }
 
+    /**
+     * [MÉTHODE] - Il s'agit d'une méthode qui valide les éléments envoyés en paramètres.
+     * Elle fait appel à la méthode {@link #connect}. Elle envoie le formulaire via le flux de communication et elle fait appel à la méthode {@link #disconnect}.
+     * @return Une liste de String contenant les différentes erreurs ou un message de succès
+     * @throws IOException
+     */
     public ArrayList<String> register(Course cours, String prenom, String nom, String email, String matricule) throws IOException{
         ArrayList<String> reponse = new ArrayList<String>();
 

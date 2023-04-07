@@ -26,10 +26,18 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import server.models.Course;
 
+/**
+ * La classe Vue représente un client utilisant un interface graphique.
+ * La classe est une extension de la classe {@link Application}.
+ */
 public class Vue extends Application {
-    private TableView<Course> table;
     private Controlleur controller;
     
+    /**
+     * [MÉTHODE] - Elle instancie un {@link Controlleur controlleur}.
+     * Elle génère un interface graphique permettant à l'utilisateur de charger les cours et de s'inscrire à un de ceux-ci.
+     * @throws Exception
+     */
     @Override
     public void start(Stage primaryStage) throws Exception{
         controller = new Controlleur(1337);
@@ -61,7 +69,6 @@ public class Vue extends Application {
         cours.setResizable(false);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.getColumns().addAll(code, cours);
-        this.table = table;
         fenetre1.getChildren().add(table);
 
         fenetre1.getChildren().add(new Separator());
@@ -152,20 +159,12 @@ public class Vue extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
     }
-
-    // @Override
-    // public void stop(){
-    //     try{
-    //         controller.disconnect();
-    //     }catch(IOException e){
-            
-    //     }
-    // }
-
-    // public void remplirTableau(Course[] cours){
-    //     table.getItems().addAll(cours);
-    // }
-        
+    
+     /**
+     * [MÉTHODE] - Il s'agit de la méthode exécutable de Vue.
+     * Elle fait appel à la méthode {@link Application#launch launch} de la classe {@link Application}.
+     * @param args Liste des paramètres de l'exécutable - Ne sont pas utilisés
+     */
     public static void main(String[] args) {
         Vue.launch(args);
     }
