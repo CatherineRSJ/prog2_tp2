@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 /**
- * Le serveur gère la liste des cours et l'inscription.
+ * La classe serveur gère la liste des cours et l'inscription.
  */
 public class Server {
 
@@ -64,7 +64,6 @@ public class Server {
      * [MÉTHODE] - Il s'agit d'une méthode qui exécute le serveur.
      * Elle attend une connexion client, elle initialise les flux de communications et elle attend pour une commande.
      * Le client est déconnecté après l'excécution de la commande.
-     * @throws Exception Si une erreur est lancée au moment de l'exécution
      */
     public void run() {
         while (true) {

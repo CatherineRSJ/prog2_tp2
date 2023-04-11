@@ -75,9 +75,8 @@ public class Controlleur {
      * [MÉTHODE] - Il s'agit d'une méthode qui valide les éléments envoyés en paramètres.
      * Elle fait appel à la méthode {@link #connect}. Elle envoie le formulaire via le flux de communication et elle fait appel à la méthode {@link #disconnect}.
      * @return Une liste de String contenant les différentes erreurs ou un message de succès
-     * @throws IOException
      */
-    public ArrayList<String> register(Course cours, String prenom, String nom, String email, String matricule) throws IOException{
+    public ArrayList<String> register(Course cours, String prenom, String nom, String email, String matricule){
         ArrayList<String> reponse = new ArrayList<String>();
 
         if(cours == null)
@@ -114,17 +113,21 @@ public class Controlleur {
         }
 
         if(reponse.size() == 0){
-            this.connect();
-
-            RegistrationForm form  = new RegistrationForm(prenom, nom, email, matricule, cours);
-
-            objectOutputStream.writeObject("INSCRIRE");
-            objectOutputStream.writeObject(form);
-
-            reponse.add("succes"); // pour afficher une alerte succès
-            reponse.add(objectInputStream.readUTF());
-
-            this.disconnect();
+            try{
+                this.connect();
+    
+                RegistrationForm form  = new RegistrationForm(prenom, nom, email, matricule, cours);
+    
+                objectOutputStream.writeObject("INSCRIRE");
+                objectOutputStream.writeObject(form);
+    
+                reponse.add("succes"); // pour afficher une alerte succès
+                reponse.add(objectInputStream.readUTF());
+    
+                this.disconnect();
+            }catch(IOException erreur){
+                reponse.add("Une erreur est survenue au moment de faire appel au serveur. Veuillez réessayer.");
+            }
         }else{
             reponse.add(0, "Le formulaire est invalide.");
         }

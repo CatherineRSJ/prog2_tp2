@@ -51,10 +51,8 @@ public class ClientSimple {
      * [MÉTHODE] - Il s'agit d'une méthode qui fait appel à la méthode {@link #loadCourses} avec la session reçue en paramètres.
      * Elle affiche les cours chargés à la console et attend un choix de l'utilisateur.
      * @param session La session pour charger les cours
-     * @throws IOException Si une erreur est lancée au moment de charger les cours
-     * @throws ClassNotFoundException Si une erreur est lancée au moment de charger les cours
      */
-    public static String choisirCours(String session) throws IOException, ClassNotFoundException{
+    public static String choisirCours(String session){
         System.out.println("Les cours offerts pendant la session d'" + session.toLowerCase() + " sont:");
         
         cours = loadCourses(session);
@@ -88,37 +86,31 @@ public class ClientSimple {
      * @param args Liste des paramètres de l'exécutable - Ne sont pas utilisés
      */
     public static void main(String[] args) {
-        try {
-            System.out.println("***Bienvenue au portail d'inscription au cours de l'UdeM***");
+        System.out.println("***Bienvenue au portail d'inscription au cours de l'UdeM***");
 
-            String choix = "";
-            while(!choix.equals("2")){
-                choix = "";
-                String session = choisirSession();
-                if(choisirCours(session).equals("Inscription")){
-                    remplirFormulaire();
+        String choix = "";
+        while(!choix.equals("2")){
+            choix = "";
+            String session = choisirSession();
+            if(choisirCours(session).equals("Inscription")){
+                remplirFormulaire();
 
-                    System.out.println("\nVeuillez faire un choix pour continuer:");
-                    System.out.print("1. Consulter la liste des sessions\n2. Quitter\n> Choix: ");
-                    
-                    while(choix.equals("")){
-                        switch (System.console().readLine()) {
-                            case "1":
-                                choix = "1";
-                                break;
-                            case "2":
-                                choix = "2";
-                                break;
-                            default:
-                                break;
-                        }
+                System.out.println("\nVeuillez faire un choix pour continuer:");
+                System.out.print("1. Consulter la liste des sessions\n2. Quitter\n> Choix: ");
+                
+                while(choix.equals("")){
+                    switch (System.console().readLine()) {
+                        case "1":
+                            choix = "1";
+                            break;
+                        case "2":
+                            choix = "2";
+                            break;
+                        default:
+                            break;
                     }
                 }
             }
-        } catch (IOException e) {
-
-        } catch (ClassNotFoundException e) {
-
         }
     }
 
@@ -150,27 +142,30 @@ public class ClientSimple {
      * Elle fait appel à {@link #disconnect}.
      * @param session La session pour charger les cours
      * @return La liste des cours pour la session reçue en paramètre
-     * @throws IOException Si une erreur est lancée au moment de charger les cours
-     * @throws ClassNotFoundException Si une erreur est lancée au moment de charger les cours
      */
-    public static ArrayList<Course> loadCourses(String session) throws IOException, ClassNotFoundException {
-        connect();
-
-        objectOutputStream.writeObject("CHARGER " + session);
-
-        ArrayList<Course> line;
-        line = (ArrayList<Course>)objectInputStream.readObject();
-
-        disconnect();
+    public static ArrayList<Course> loadCourses(String session) {
+        ArrayList<Course> line = new ArrayList<Course>();
+        try{
+            connect();
+    
+            objectOutputStream.writeObject("CHARGER " + session);
+    
+            line = (ArrayList<Course>)objectInputStream.readObject();
+    
+            disconnect();
+        }catch(IOException erreur){
+            System.out.println("\nUne erreur est survenue au moment de faire appel au serveur. Veuillez réessayer.");
+        }catch(ClassNotFoundException erreur){
+            System.out.println("\nUne erreur est survenue au moment de recevoir la liste des cours. Veuillez réessayer.");
+        }
         return line;
     }
     
     /**
      * [MÉTHODE] - Il s'agit d'une méthode qui demande à l'utilisateur les informations nécessaires à la création d'un {@link RegistrationForm}.
      * Elle fait appel à la méthode {@link #connect}. Elle envoie le formulaire via le flux de communication et elle fait appel à la méthode {@link #disconnect}.
-     * @throws IOException
      */
-    public static void remplirFormulaire() throws IOException{
+    public static void remplirFormulaire(){
         String prenom = "";
         String nom = "";
         String email = "";
@@ -223,16 +218,20 @@ public class ClientSimple {
             }
         } while (coursTrouve == null);
         
-        connect();
-
-        RegistrationForm form  = new RegistrationForm(prenom, nom, email, matricule, coursTrouve);
-
-        objectOutputStream.writeObject("INSCRIRE");
-        objectOutputStream.writeObject(form);
-
-        System.out.println(objectInputStream.readUTF());
-
-        disconnect();
+        try{
+            connect();
+    
+            RegistrationForm form  = new RegistrationForm(prenom, nom, email, matricule, coursTrouve);
+    
+            objectOutputStream.writeObject("INSCRIRE");
+            objectOutputStream.writeObject(form);
+    
+            System.out.println(objectInputStream.readUTF());
+    
+            disconnect();
+        }catch(IOException erreur){
+            System.out.println("\nUne erreur est survenue au moment de faire appel au serveur. Veuillez réessayer.");
+        }
     }
 }
 

@@ -129,25 +129,25 @@ public class Vue extends Application {
         envoyer.setOnAction(new EventHandler<ActionEvent>() {
             @Override 
             public void handle(ActionEvent e) {
-                try{
-                    ArrayList<String> reponse = controller.register(
-                        table.getSelectionModel().getSelectedItem(), 
-                        prenom.getText(), 
-                        nom.getText(), 
-                        email.getText(), 
-                        matricule.getText()
-                    );
-                    if(reponse.get(0) == "succes"){
-                        alerte.setAlertType(AlertType.INFORMATION);
-                        alerte.setContentText(reponse.get(1));
-                    }else{
-                        alerte.setAlertType(AlertType.ERROR);
-                        alerte.setContentText(String.join("\n", reponse));
-                    }
-                    alerte.show();
-                }catch(IOException ex){
-
+                ArrayList<String> reponse = controller.register(
+                    table.getSelectionModel().getSelectedItem(), 
+                    prenom.getText(), 
+                    nom.getText(), 
+                    email.getText(), 
+                    matricule.getText()
+                );
+                if(reponse.get(0) == "succes"){
+                    alerte.setAlertType(AlertType.INFORMATION);
+                    alerte.setContentText(reponse.get(1));
+                    prenom.setText("");
+                    nom.setText("");
+                    email.setText("");
+                    matricule.setText("");
+                }else{
+                    alerte.setAlertType(AlertType.ERROR);
+                    alerte.setContentText(String.join("\n", reponse));
                 }
+                alerte.show();
             }
         });
         fenetre2.getChildren().add(envoyer);
